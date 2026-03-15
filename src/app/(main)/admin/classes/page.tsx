@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getClasses, deleteClass } from "@/actions/classes";
 import { ClassForm } from "@/components/admin/ClassForm";
 import { Button } from "@/components/ui/button";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { ClassScheduleView } from "@/components/view/ClassScheduleView";
 
 export default async function ViewPage({

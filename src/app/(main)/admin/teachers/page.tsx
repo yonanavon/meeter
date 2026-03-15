@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getTeachers, deleteTeacher } from "@/actions/teachers";
 import { TeacherForm } from "@/components/admin/TeacherForm";
 import { Button } from "@/components/ui/button";

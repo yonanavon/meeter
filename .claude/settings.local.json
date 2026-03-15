@@ -23,7 +23,8 @@
       "Bash(RAILWAY_TOKEN=\"395bfb6f-a21c-4d42-af91-2ac87878b706\" NODE_TLS_REJECT_UNAUTHORIZED=0 railway status 2>&1)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(head:*)"
     ]
   }
 }

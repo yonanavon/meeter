@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getTeachers } from "@/actions/teachers";
 import { getClasses } from "@/actions/classes";
