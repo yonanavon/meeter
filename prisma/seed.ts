@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import path from "node:path";
 
-const adapter = new PrismaBetterSqlite3({ url: `file:${path.join(__dirname, "dev.db")}` });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   // Teachers

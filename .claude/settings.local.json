@@ -12,7 +12,18 @@
       "Bash(curl -s http://localhost:3000/api/teachers 2>&1 | head -200)",
       "Bash(curl -s http://localhost:3000/api/teachers)",
       "Bash(curl -s --max-time 60 http://localhost:3000/api/teachers)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(which railway:*)",
+      "Bash(railway status:*)",
+      "Bash(railway login:*)",
+      "Bash(RAILWAY_TOKEN=\"395bfb6f-a21c-4d42-af91-2ac87878b706\" railway status 2>&1)",
+      "Bash(RAILWAY_TOKEN=\"395bfb6f-a21c-4d42-af91-2ac87878b706\" NODE_TLS_REJECT_UNAUTHORIZED=0 railway status 2>&1)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
