@@ -1,8 +1,15 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { whatsapp } = await import("./lib/whatsapp");
-    const { startScheduler } = await import("./lib/scheduler");
-    whatsapp.connect().catch(console.error);
-    startScheduler();
+    // Delay startup to ensure DB migrations have completed
+    setTimeout(async () => {
+      try {
+        const { whatsapp } = await import("./lib/whatsapp");
+        const { startScheduler } = await import("./lib/scheduler");
+        await whatsapp.connect();
+        startScheduler();
+      } catch (err) {
+        console.error("[Instrumentation] WhatsApp startup error:", err);
+      }
+    }, 5_000);
   }
 }

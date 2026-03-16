@@ -19,7 +19,12 @@ import {
   updateReminderRule,
   deleteReminderRule,
 } from "@/actions/reminders";
-import type { PendingSticker } from "@/lib/whatsapp";
+type PendingSticker = {
+  base64: string;
+  mimetype: string;
+  from: string;
+  timestamp: string;
+};
 
 type DBSticker = {
   id: number;
