@@ -15,7 +15,7 @@ export async function createClass(data: { name: string; number: number }) {
 
 export async function updateClass(
   id: number,
-  data: { name: string; number: number }
+  data: { name: string; number: number; whatsappJid?: string | null }
 ) {
   await prisma.class.update({ where: { id }, data });
   revalidatePath("/admin/classes");

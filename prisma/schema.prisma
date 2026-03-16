@@ -18,7 +18,47 @@ model Class {
   id          Int          @id @default(autoincrement())
   name        String
   number      Int          @unique
+  whatsappJid String?
   assignments Assignment[]
+}
+
+model WhatsappSession {
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("whatsapp_sessions")
+}
+
+model Sticker {
+  id            Int            @id @default(autoincrement())
+  base64        String
+  mimetype      String         @default("image/webp")
+  approved      Boolean        @default(false)
+  label         String         @default("")
+  createdAt     DateTime       @default(now())
+  reminderRules ReminderRule[]
+  @@map("stickers")
+}
+
+model ReminderRule {
+  id            Int     @id @default(autoincrement())
+  minutesBefore Int
+  label         String
+  stickerId     Int
+  sticker       Sticker @relation(fields: [stickerId], references: [id], onDelete: Cascade)
+  enabled       Boolean @default(true)
+  @@map("reminder_rules")
+}
+
+model ReminderLog {
+  id           Int      @id @default(autoincrement())
+  assignmentId Int
+  ruleId       Int
+  groupJid     String
+  sentAt       DateTime @default(now())
+  @@unique([assignmentId, ruleId])
+  @@map("reminder_logs")
 }
 
 model TimeSlot {

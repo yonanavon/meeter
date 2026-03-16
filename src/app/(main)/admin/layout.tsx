@@ -26,6 +26,18 @@ export default function AdminLayout({
         >
           שעות
         </Link>
+        <Link
+          href="/admin/whatsapp"
+          className="text-sm font-medium hover:text-primary"
+        >
+          וואטסאפ
+        </Link>
+        <Link
+          href="/admin/stickers"
+          className="text-sm font-medium hover:text-primary"
+        >
+          סטיקרים
+        </Link>
       </div>
       {children}
     </div>
