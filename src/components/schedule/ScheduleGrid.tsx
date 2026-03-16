@@ -11,6 +11,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScheduleCell } from "./ScheduleCell";
 import { TeacherSidebar } from "./TeacherSidebar";
 import type {
@@ -35,6 +36,7 @@ export function ScheduleGrid({
 }: ScheduleGridProps) {
   const [assignments, setAssignments] = useState<AssignmentWithRelations[]>([]);
   const [activeTeacher, setActiveTeacher] = useState<string | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -123,6 +125,20 @@ export function ScheduleGrid({
     fetchAssignments();
   }
 
+  async function handleCopyPrevious() {
+    setIsCopying(true);
+    try {
+      await fetch("/api/assignments/copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetDate: date }),
+      });
+      await fetchAssignments();
+    } finally {
+      setIsCopying(false);
+    }
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -130,7 +146,17 @@ export function ScheduleGrid({
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-4">
-        <TeacherSidebar teachers={teachers} />
+        <div className="flex items-center gap-2">
+          <TeacherSidebar teachers={teachers} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyPrevious}
+            disabled={isCopying}
+          >
+            {isCopying ? "מעתיק..." : "העתק מיום קודם"}
+          </Button>
+        </div>
 
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full border-collapse">
