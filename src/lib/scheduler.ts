@@ -3,27 +3,51 @@ import { whatsapp } from "./whatsapp";
 
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
+const TIMEZONE = "Asia/Jerusalem";
+
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
 
+function getNowInIsrael() {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter.formatToParts(now).map((p) => [p.type, p.value])
+  );
+  return {
+    todayStr: `${parts.year}-${parts.month}-${parts.day}`,
+    nowMinutes: Number(parts.hour) * 60 + Number(parts.minute),
+  };
+}
+
 async function tick() {
   try {
-    if (whatsapp.getStatus() !== "connected") return;
+    const waStatus = whatsapp.getStatus();
+    if (waStatus !== "connected") {
+      console.log(`[Scheduler] Skipping tick — WA status: ${waStatus}`);
+      return;
+    }
 
     const rules = await prisma.reminderRule.findMany({
       where: { enabled: true },
       include: { sticker: true },
     });
-    if (rules.length === 0) return;
+    if (rules.length === 0) {
+      console.log("[Scheduler] No enabled rules");
+      return;
+    }
 
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-    const todayStr = `${yyyy}-${mm}-${dd}`;
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const { todayStr, nowMinutes } = getNowInIsrael();
 
     // Get today's assignments that have a WhatsApp group
     const assignments = await prisma.assignment.findMany({
@@ -34,7 +58,14 @@ async function tick() {
       include: { class: true, timeSlot: true },
     });
 
-    if (assignments.length === 0) return;
+    if (assignments.length === 0) {
+      console.log(`[Scheduler] No assignments for ${todayStr} with WA group`);
+      return;
+    }
+
+    console.log(
+      `[Scheduler] Tick: ${todayStr} ${Math.floor(nowMinutes / 60)}:${String(nowMinutes % 60).padStart(2, "0")} — ${rules.length} rules, ${assignments.length} assignments`
+    );
 
     for (const rule of rules) {
       for (const assignment of assignments) {
