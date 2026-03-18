@@ -38,6 +38,12 @@ export default function AdminLayout({
         >
           סטיקרים
         </Link>
+        <Link
+          href="/admin/logs"
+          className="text-sm font-medium hover:text-primary"
+        >
+          לוגים
+        </Link>
       </div>
       {children}
     </div>
