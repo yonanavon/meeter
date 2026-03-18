@@ -22,7 +22,23 @@ class WhatsAppService extends EventEmitter {
   private pendingStickers: PendingSticker[] = [];
   private maxPendingStickers = 20;
 
+  constructor() {
+    super();
+    this.setMaxListeners(50);
+  }
+
   async connect() {
+    if (this.status === "connecting" || this.status === "connected") {
+      console.log(`[WA] Already ${this.status}, skipping connect()`);
+      return;
+    }
+
+    // Clean up existing socket if any
+    if (this.socket) {
+      try { this.socket.end(undefined); } catch { /* ignore */ }
+      this.socket = null;
+    }
+
     try {
       this.status = "connecting";
       this._emitStatus();
@@ -96,7 +112,8 @@ class WhatsAppService extends EventEmitter {
               console.log(
                 `[WA] Reconnecting... attempt ${this.reconnectAttempts} in ${delay}ms`
               );
-              this.status = "connecting";
+              this.socket = null;
+              this.status = "disconnected";
               this._emitStatus();
               setTimeout(() => this.connect(), delay);
             } else {
@@ -262,4 +279,4 @@ const globalForWA = globalThis as unknown as {
 };
 export const whatsapp =
   globalForWA.whatsapp ?? new WhatsAppService();
-if (process.env.NODE_ENV !== "production") globalForWA.whatsapp = whatsapp;
+globalForWA.whatsapp = whatsapp;

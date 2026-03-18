@@ -4,12 +4,21 @@ import { whatsapp } from "@/lib/whatsapp";
 
 export async function GET() {
   const encoder = new TextEncoder();
+  let cleanup: (() => void) | null = null;
+
   const stream = new ReadableStream({
     start(controller) {
+      let closed = false;
+
       const send = (event: string, data: unknown) => {
-        controller.enqueue(
-          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-        );
+        if (closed) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          );
+        } catch {
+          doCleanup();
+        }
       };
 
       // Send current state immediately
@@ -18,13 +27,13 @@ export async function GET() {
       if (qr) send("qr", { qr });
 
       const onStatus = (status: string) => {
-        try { send("status", { status }); } catch { /* client disconnected */ }
+        send("status", { status });
       };
       const onQR = (qr: string) => {
-        try { send("qr", { qr }); } catch { /* client disconnected */ }
+        send("qr", { qr });
       };
       const onSticker = () => {
-        try { send("sticker", { count: whatsapp.getPendingStickers().length }); } catch { /* client disconnected */ }
+        send("sticker", { count: whatsapp.getPendingStickers().length });
       };
 
       whatsapp.on("status", onStatus);
@@ -33,25 +42,23 @@ export async function GET() {
 
       // Keepalive
       const keepalive = setInterval(() => {
-        try { controller.enqueue(encoder.encode(": keepalive\n\n")); } catch { clearInterval(keepalive); }
+        if (closed) { clearInterval(keepalive); return; }
+        try { controller.enqueue(encoder.encode(": keepalive\n\n")); } catch { doCleanup(); }
       }, 30_000);
 
-      // Cleanup on cancel — use a polling approach since ReadableStream cancel isn't always called
-      const checkClosed = setInterval(() => {
-        try {
-          controller.enqueue(encoder.encode(""));
-        } catch {
-          cleanup();
-        }
-      }, 60_000);
-
-      function cleanup() {
+      function doCleanup() {
+        if (closed) return;
+        closed = true;
         whatsapp.off("status", onStatus);
         whatsapp.off("qr", onQR);
         whatsapp.off("sticker", onSticker);
         clearInterval(keepalive);
-        clearInterval(checkClosed);
       }
+
+      cleanup = doCleanup;
+    },
+    cancel() {
+      cleanup?.();
     },
   });
 
